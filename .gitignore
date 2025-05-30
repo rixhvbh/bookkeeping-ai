@@ -1,0 +1,11 @@
+# .gitignore
+__pycache__/
+*.pyc
+.env
+*.pkl
+*.xlsx
+*.csv
+logs/
+input/
+output/
+models/
