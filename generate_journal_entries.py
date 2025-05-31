@@ -28,12 +28,16 @@ journal_entries = []
 
 for idx, row in df.iterrows():
     category = row['Predicted Category']
-    amount = row['Amount']
     vendor = row['Vendor']
     date = row['Date']
 
     if pd.isna(category) or category not in chart_of_accounts:
         continue
+
+    # Compute Amount from Debit/Credit
+    debit = row.get('Debit', 0) or 0
+    credit = row.get('Credit', 0) or 0
+    amount = debit if debit > 0 else credit
 
     account_name, account_type, drcr = chart_of_accounts[category]
 
@@ -68,6 +72,7 @@ for idx, row in df.iterrows():
             'Credit': amount
         })
 
+
 # === Convert to DataFrame and Beautify ===
 journal_df = pd.DataFrame(journal_entries)
 journal_df['Debit'] = pd.to_numeric(journal_df['Debit'], errors='coerce').fillna(0)
@@ -99,4 +104,4 @@ with open(log_file_path, 'a') as log:
     log.write(f"Unique Accounts Used: {journal_df['Account'].nunique()}\n")
     log.write(f"Total Debit: {total_debit:.2f}\n")
     log.write(f"Total Credit: {total_credit:.2f}\n")
-    log.write("Journal Balanced ✅\n" if journal_balanced else "🚨 Journal Unbalanced ❌\n")
+    log.write("Journal Balanced: YES\n" if journal_balanced else "Journal Balanced: NO (Check DR/CR mismatch!)\n")

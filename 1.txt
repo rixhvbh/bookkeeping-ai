@@ -1,0 +1,45 @@
+for idx, row in df.iterrows():
+    category = row['Predicted Category']
+    vendor = row['Vendor']
+    date = row['Date']
+
+    if pd.isna(category) or category not in chart_of_accounts:
+        continue
+
+    # Compute Amount from Debit/Credit
+    debit = row.get('Debit', 0) or 0
+    credit = row.get('Credit', 0) or 0
+    amount = debit if debit > 0 else credit
+
+    account_name, account_type, drcr = chart_of_accounts[category]
+
+    if drcr == 'Debit':
+        journal_entries.append({
+            'Date': date,
+            'Description': vendor,
+            'Account': account_name,
+            'Debit': amount,
+            'Credit': ''
+        })
+        journal_entries.append({
+            'Date': date,
+            'Description': vendor,
+            'Account': 'Cash/Bank',
+            'Debit': '',
+            'Credit': amount
+        })
+    else:
+        journal_entries.append({
+            'Date': date,
+            'Description': vendor,
+            'Account': 'Cash/Bank',
+            'Debit': amount,
+            'Credit': ''
+        })
+        journal_entries.append({
+            'Date': date,
+            'Description': vendor,
+            'Account': account_name,
+            'Debit': '',
+            'Credit': amount
+        })
